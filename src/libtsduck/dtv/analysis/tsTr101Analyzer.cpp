@@ -140,10 +140,10 @@ void ts::TR101_290Analyzer::handleSection(SectionDemux& demux, const Section& ta
         }
     }
 }
-void ts::TR101_290Analyzer::handleInvalidSection(SectionDemux& demux, const DemuxedData& data) {
+void ts::TR101_290Analyzer::handleInvalidSection(SectionDemux& demux, const DemuxedData& data, Section::Status status) {
     auto _service = getService(data.sourcePID());
-    // todo: it is not guaranteed that it is a CRC error that causes this issue.
-    _service->crc_error++;
+    if (status == Section::Status::INV_CRC32)
+        _service->crc_error++;
 }
 
 std::shared_ptr<ts::TR101_290Analyzer::ServiceContext> ts::TR101_290Analyzer::getService(PID pid)

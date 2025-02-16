@@ -195,7 +195,7 @@ namespace ts {
         // CALLBACKS
         void handleTable(SectionDemux& demux, const BinaryTable& table) override;
         void handleSection(SectionDemux& demux, const Section& section) override;
-        void handleInvalidSection(SectionDemux& demux, const DemuxedData& data) override;
+        void handleInvalidSection(SectionDemux& demux, const DemuxedData& data, Section::Status status) override;
 
         std::shared_ptr<ServiceContext> getService(PID pid);
 
