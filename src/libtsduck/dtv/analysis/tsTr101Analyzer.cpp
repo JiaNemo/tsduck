@@ -88,26 +88,26 @@ void ts::TR101_290Analyzer::handleTable(SectionDemux& demux, const BinaryTable& 
     }
 }
 
-void ts::TR101_290Analyzer::handleSection(SectionDemux& demux, const Section& table)
+void ts::TR101_290Analyzer::handleSection(SectionDemux& demux, const Section& section)
 {
-    if (table.sectionNumber() != 0) {
+    if (section.sectionNumber() != 0) {
         // we only care about the first packet that has arrived.
         return;
     }
 
-    auto service = getService(table.sourcePID());
+    auto service = getService(section.sourcePID());
 
-    if (table.sourcePID() == PID_PAT && table.tableId() != TID_PAT) {
+    if (section.sourcePID() == PID_PAT && section.tableId() != TID_PAT) {
         service->pat_err.count++;
         service->pat_err2.count++;
     }
 
-    if (service->_type == ServiceContext::Pmt && table.tableId() != TID_PMT) {
+    if (service->_type == ServiceContext::Pmt && section.tableId() != TID_PMT) {
         service->pmt_err.count++;
         service->pmt_err2.count++;
     }
 
-    if (table.tableId() == TID_PAT && service->_type == ServiceContext::Pat) {
+    if (section.tableId() == TID_PAT && service->_type == ServiceContext::Pat) {
         service->_type = ServiceContext::Pat;
         if (service->_last_table_ts != INVALID_PCR) {
             auto diff = long(_currentTimestamp - service->_last_table_ts);
@@ -120,7 +120,7 @@ void ts::TR101_290Analyzer::handleSection(SectionDemux& demux, const Section& ta
         }
         service->_last_table_ts = _currentTimestamp;
     }
-    else if (table.tableId() == TID_PMT && service->_type == ServiceContext::Pmt) {
+    else if (section.tableId() == TID_PMT && service->_type == ServiceContext::Pmt) {
         if (service->_last_table_ts != INVALID_PCR) {
             auto diff = long(_currentTimestamp - service->_last_table_ts);
             service->pmt_err.pushSysClockFreq(diff);
@@ -132,7 +132,7 @@ void ts::TR101_290Analyzer::handleSection(SectionDemux& demux, const Section& ta
         }
         service->_last_table_ts = _currentTimestamp;
     }
-    else if (table.tableId() == TID_CAT) {
+    else if (section.tableId() == TID_CAT) {
         _lastCatIndex = _packetIndex;
 
         for (auto & [_, s2] : _services) {
