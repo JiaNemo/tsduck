@@ -128,7 +128,7 @@ namespace ts {
 
                 void pushSysClockFreq(long val)
                 {
-                    const int ns = (int)(val * 1e9l / SYSTEM_CLOCK_FREQ);
+                    const int ns = static_cast<int>(val * 1e9l / SYSTEM_CLOCK_FREQ);
                     pushNs(ns);
                 }
 
@@ -226,5 +226,35 @@ namespace ts {
         void reset();
     };
 }  // namespace ts
+
+
+static const char16_t* ERR = u"[ERR] ";
+static const char16_t* OK  = u"[OK]  ";
+static const char16_t* NA  = u"[N/A] ";
+struct ErrorState {
+    long count=0;
+    bool show=false;
+    std::optional<ts::TR101_290Analyzer::ServiceContext::IntMinMax> min_max{};
+};
+
+bool is_pes(const ts::TR101_290Analyzer::ServiceContext& ctx);
+bool is_pat(const ts::TR101_290Analyzer::ServiceContext& ctx);
+bool is_pmt(const ts::TR101_290Analyzer::ServiceContext& ctx);
+bool is_table(const ts::TR101_290Analyzer::ServiceContext& ctx);
+ErrorState get_sync_byte_err(const ts::TR101_290Analyzer::ServiceContext& ctx);
+ErrorState get_pat_error(const ts::TR101_290Analyzer::ServiceContext& ctx);
+ErrorState get_pat_error2(const ts::TR101_290Analyzer::ServiceContext& ctx);
+ErrorState get_cc_err(const ts::TR101_290Analyzer::ServiceContext& ctx);
+ErrorState get_pmt_error(const ts::TR101_290Analyzer::ServiceContext& ctx);
+ErrorState get_pmt_error2(const ts::TR101_290Analyzer::ServiceContext& ctx);
+ErrorState get_pid_error(const ts::TR101_290Analyzer::ServiceContext& ctx);
+ErrorState get_transport_error(const ts::TR101_290Analyzer::ServiceContext& ctx);
+ErrorState get_crc_error(const ts::TR101_290Analyzer::ServiceContext& ctx);
+ErrorState get_pcr_error(const ts::TR101_290Analyzer::ServiceContext& ctx);
+ErrorState get_repetition_error(const ts::TR101_290Analyzer::ServiceContext& ctx);
+ErrorState get_discontinuity_error(const ts::TR101_290Analyzer::ServiceContext& ctx);
+ErrorState get_accuracy_error(const ts::TR101_290Analyzer::ServiceContext& ctx);
+ErrorState get_pts_error(const ts::TR101_290Analyzer::ServiceContext& ctx);
+ErrorState get_cat_error(const ts::TR101_290Analyzer::ServiceContext& ctx);
 
 #endif  //TSTR101ANALYZER_H

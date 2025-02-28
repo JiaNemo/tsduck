@@ -62,7 +62,7 @@ void ts::TR101_290Analyzer::handleTable(SectionDemux& demux, const BinaryTable& 
 
         // Remove PMT assignments.
         for (auto it = _services.begin(); it != _services.end(); ++it) {
-            if (it->second->_type == ServiceContext::Pmt && !pat.pmts.contains(it->second->_pmt_service_id)) {
+            if (it->second->_type == ServiceContext::Pmt && !pat.pmts.contains(static_cast<const unsigned short>(it->second->_pmt_service_id))) {
                 it->second->_type = ServiceContext::Unassigned;
                 _demux.removePID(it->first);
             }
@@ -267,7 +267,7 @@ void ts::TR101_290Analyzer::processPacket(ServiceContext& ctx, const TSPacket& p
         auto pcr = pkt.getPCR();
         if (ctx.last_pcr_val != INVALID_PCR && ctx.last_pcr_ts != INVALID_PCR) {
             auto pcr_dist = pcr - ctx.last_pcr_val;
-            ctx.pcr_discontinuity_err.pushSysClockFreq((int)pcr_dist);
+            ctx.pcr_discontinuity_err.pushSysClockFreq(static_cast<int>(pcr_dist));
 
             if (pcr_dist > PCR_DISCONTINUITY_LIMIT) {
                 ctx.pcr_discontinuity_err.count++;
@@ -275,7 +275,7 @@ void ts::TR101_290Analyzer::processPacket(ServiceContext& ctx, const TSPacket& p
             }
 
             auto pkt_dist = pkt_ts - ctx.last_pcr_ts;
-            ctx.pcr_repetition_err.pushSysClockFreq((int)pkt_dist);
+            ctx.pcr_repetition_err.pushSysClockFreq(static_cast<int>(pkt_dist));
 
             if (pkt_dist > PCR_REPETITION_LIMIT) {
                 ctx.pcr_repetition_err.count++;
@@ -309,14 +309,6 @@ void ts::TR101_290Analyzer::feedPacket(const TSPacket& packet, const TSPacketMet
     _demux.feedPacket(packet);
 }
 
-const char16_t* ERR = u"[ERR] ";
-const char16_t* OK  = u"[OK]  ";
-const char16_t* NA  = u"[N/A] ";
-struct ErrorState {
-    long count=0;
-    bool show=false;
-    std::optional<ts::TR101_290Analyzer::ServiceContext::IntMinMax> min_max{};
-};
 
 typedef std::function<ErrorState(const ts::TR101_290Analyzer::ServiceContext&)> get_func;
 
@@ -360,8 +352,6 @@ static void print_real(const char16_t* name, const get_func& fn, std::ostream& s
 // {
 //     stm << (count == 0 ? OK : ERR) << " " << name << ": " << count << "\n";
 // }
-
-
 
 static void json(const char16_t* name, const get_func& fn,  ts::json::Value& stm, ts::json::Value& pids, std::map<ts::PID, std::shared_ptr<ts::TR101_290Analyzer::ServiceContext>>& _services)
 {
